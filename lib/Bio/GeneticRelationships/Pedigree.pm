@@ -25,10 +25,23 @@ use Bio::GeneticRelationships::Individual;
 
 =cut
 
+subtype 'CrossType',
+    as 'Str',
+    where { 
+	$_ eq 'single_cross' ||
+	$_ eq 'double_cross' ||
+	$_ eq 'three_way_cross' ||
+	$_ eq 'backcross' ||
+	$_ eq 'self' ||
+	$_ eq 'mixed_population' ||
+	$_ eq 'doubled_haploid' ||
+	$_ eq 'unknown' };
+	
+
 has 'name' => (isa => 'Str',is => 'rw', predicate => 'has_name');
 has 'female_parent' => (isa =>'Bio::GeneticRelationships::Individual', is => 'rw', predicate => 'has_female_parent');
 has 'male_parent' => (isa =>'Bio::GeneticRelationships::Individual', is => 'rw', predicate => 'has_male_parent');
-has 'cross_type' => (isa =>'Str', is => 'rw', predicate => 'has_cross_type');
+has 'cross_type' => (isa =>'CrossType', is => 'rw', predicate => 'has_cross_type');
 
 ###
 1;#do not remove

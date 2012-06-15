@@ -27,7 +27,7 @@ use warnings;
 use autodie;
 
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 BEGIN {use_ok( 'Bio::GeneticRelationships::Pedigree' ); }
 require_ok( 'Bio::GeneticRelationships::Pedigree' );
 ok (my $pedigree = Bio::GeneticRelationships::Pedigree->new());
@@ -47,4 +47,8 @@ is ($pedigree->get_female_parent(),$female_individual);
 is ($pedigree->get_male_parent(),$male_individual);
 is ($pedigree->get_female_parent()->get_name(),'female_test_name');
 is ($pedigree->get_male_parent()->get_name(),'male_test_name');
+
+#test cross type method
+ok ($pedigree->set_cross_type('single_cross'));
+is ($pedigree->get_cross_type(),'single_cross');
 
