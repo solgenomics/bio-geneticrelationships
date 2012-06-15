@@ -1,0 +1,11 @@
+LICENSE
+MANIFEST
+META.yml
+Makefile.PL
+README
+dist.ini
+lib/Bio/GeneticRelationships.pm
+lib/Bio/GeneticRelationships/Pedigree.pm
+lib/Bio/GeneticRelationships/Pedigree.pm~
+t/Bio/GeneticRelationships/pedigree.t
+t/Bio/GeneticRelationships/pedigree.t~
