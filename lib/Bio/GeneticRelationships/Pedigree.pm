@@ -224,6 +224,7 @@ sub traverse_pedigree {
     my %nodes;
     my %joins;
     my %joints;
+    my %selfs;	
     my $female_parent_id = "female_parent_of_$current_node_id";
     my $male_parent_id = "male_parent_of_$current_node_id";
     my $female_parent_name;
@@ -240,11 +241,11 @@ sub traverse_pedigree {
 		$female_parent_name = '';
 	}
 	if ($trav_ped->get_female_parent()->has_pedigree()) {
-		my ($returned_nodes,$returned_joins,$returned_joints) = traverse_pedigree($trav_ped->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
+		my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($trav_ped->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
 
 		@nodes{keys %$returned_nodes} = values %$returned_nodes;
 		@joins{keys %$returned_joins} = values %$returned_joins;
-		@joints{keys %$returned_joints} = values %$returned_joints;
+		@selfs{keys %$returned_selfs} = values %$returned_selfs;
 	}
 
 	$nodes{$female_parent_id} = $female_parent_name;
@@ -268,11 +269,16 @@ sub traverse_pedigree {
 
 	if ($female_parent_name ne $male_parent_name){
 		if ($trav_ped->get_male_parent()->has_pedigree()) {
-			my ($returned_nodes,$returned_joins,$returned_joints) = traverse_pedigree($trav_ped->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
+			my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($trav_ped->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
 			@nodes{keys %$returned_nodes} = values %$returned_nodes;
 			@joins{keys %$returned_joins} = values %$returned_joins;
-			@joints{keys %$returned_joints} = values %$returned_joints;
+			@selfs{keys %$returned_selfs} = values %$returned_selfs;
+			
 		}
+	}
+	else {
+
+		$selfs{$female_parent_name} = $current_node_name;	
 	}
 
 
@@ -283,10 +289,10 @@ sub traverse_pedigree {
 	$male_parent_name = '?';
     }
 
-    if ($trav_ped->has_male_parent() && $trav_ped->has_female_parent()){
-	$joint_name = "joint_".$female_parent_name."_and_".$male_parent_name;
-	$joints{$joint_name} = $joint_name;
-    }
+#   if ($trav_ped->has_male_parent() && $trav_ped->has_female_parent()){
+#	$joint_name = "joint_".$female_parent_name."_and_".$male_parent_name;
+#	$joints{$joint_name} = $joint_name;
+#    }
 
 	
 
@@ -295,7 +301,7 @@ sub traverse_pedigree {
     #$nodes{$male_parent_id} = $male_parent_name;
 
 
-    return (\%nodes,\%joins,\%joints);
+    return (\%nodes,\%joins,\%selfs);
 }
 
 sub draw_graphviz {
@@ -305,6 +311,7 @@ sub draw_graphviz {
     my %nodes;
     my %joins;
     my %joints;
+    my %selfs;	
     my $graphviz_text;
     my $female_parent_id = "female_parent_of_$current_node_id";
     my $male_parent_id = "male_parent_of_$current_node_id";
@@ -321,25 +328,21 @@ sub draw_graphviz {
 	$joins{$female_parent_id} = $current_node_id;
         
 	    if ($self->get_female_parent()->has_name()){
-		#print "First option\n";
 		$female_parent_name = $self->get_female_parent()->get_name();
 	    }
 	    else {
-		#print "Second option\n";
 		$female_parent_name = '';
 	    }
 	    $nodes{$female_parent_id} = $female_parent_name;
 	
 	    if ($self->get_female_parent()->has_pedigree()){
-		#print "#### Traversing ####\n";
-		my ($returned_nodes,$returned_joins,$returned_joints) = traverse_pedigree($self->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
+		my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($self->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
 		@nodes{keys %$returned_nodes} = values %$returned_nodes;
 		@joins{keys %$returned_joins} = values %$returned_joins;
-		@joints{keys %$returned_joints} = values %$returned_joints;
+		@selfs{keys %$returned_selfs} = values %$returned_selfs;
 
 	    }
     }
-
 
     if ($self->has_male_parent()) {
 	$joins{$male_parent_id} = $current_node_id;
@@ -350,23 +353,25 @@ sub draw_graphviz {
 	    else {
 		$male_parent_name = '';
 	    }
+
 	    $nodes{$male_parent_id} = $male_parent_name;
-	    if ($self->get_male_parent()->has_pedigree()){
-		my ($returned_nodes,$returned_joins,$returned_joints) = traverse_pedigree($self->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
-		@nodes{keys %$returned_nodes} = values %$returned_nodes;
-		@joins{keys %$returned_joins} = values %$returned_joins;
-		@joints{keys %$returned_joints} = values %$returned_joints;
 
-	    }
+	if ($female_parent_name ne $male_parent_name){
+		if ($self->get_male_parent()->has_pedigree()) {
+			my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($self->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
+			@nodes{keys %$returned_nodes} = values %$returned_nodes;
+			@joins{keys %$returned_joins} = values %$returned_joins;
+			@selfs{keys %$returned_selfs} = values %$returned_selfs;
+			
+		}
+	}
+	else {
 
-	#my $joint_name = "joint_".$current_node_name;
-	#$joints{$joint_name} = $joint_name;
+		$selfs{$female_parent_name} = $current_node_name;	
+	}
+
     }
 
-   if ($self->has_male_parent() && $self->has_female_parent()){
-	my $joint_name = "joint_".$female_parent_name."_and_".$male_parent_name;
-	$joints{$joint_name} = $joint_name;
-   }
 
     $graphviz_text .= "node [color = \"red\"]\r\nnode [fontsize=11, fontname=\"Helvetica\"]\r\ngraph [bgcolor=\"#FAFAFA\"]\r\nranksep= .9\r\nnodesep=1.2\r\n\r\n";
     $graphviz_text .= "//Node Declarations\r\n";
@@ -374,66 +379,62 @@ sub draw_graphviz {
     #Quick way to stop making duplicate node declarations in the Graphviz file.
     my %hashcheck;
     
-    #write nodes to graphviz
+    #Makes node declarations in the Graphviz file.
     foreach my $node_key (keys %nodes) {
 
 	unless ($hashcheck{$nodes{$node_key}}) {
 		$hashcheck{$nodes{$node_key}} = $nodes{$node_key};	
 	
+		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]\r\n";
+		$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+		if ($node_key lt "m"){
+			$graphviz_text .= "[shape = \"ellipse\"]";
+		}
+		else {
+			$graphviz_text .= "[shape = \"box\"]";
+		}
 
-	#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]\r\n";
-	$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
-	if ($node_key lt "m"){
-		$graphviz_text .= "[shape = \"ellipse\"]";
-	}
-	else {
-		$graphviz_text .= "[shape = \"box\"]";
-	}
-	$graphviz_text .= "\r\n";
-	#print STDERR "Node: $node_key $nodes{$node_key} \n";
+		$graphviz_text .= "\r\n";
+		#print STDERR "Node: $node_key $nodes{$node_key} \n";
 	}
     }
 
-     $graphviz_text .= "//End Node Declarations\r\n\r\n";
+   $graphviz_text .= "//End Node Declarations\r\n\r\n";
 
-     $graphviz_text .= "//Joint Declarations | Format: joint_femaleParent_and_maleParent\r\n";
-
-     # Joints are declared in this loop.
-     foreach my $joint_key (keys %joints){
-	$graphviz_text .= $joint_key." [shape=\"point\"]\r\n";
-
-     }
-
+   $graphviz_text .= "//Edge Relationships\r\n";
 	
-     $graphviz_text .= "//End Joint Declarations\r\n\r\n";
 
-     $graphviz_text .= "//Edge Relationships\r\n";
+   # Hash that stores selfing edges already added in the loop
+   my %self_joins;	
 
-#my %jointmap;
-
-#foreach my $key (e
-	
    foreach my $join_key (keys %joins){
-
-	$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}."\r\n";
 	
-	#my $temp = "joint_".$nodes{$join_key};
+	# Checks if an edge is a selfing-edge.
+	if (($selfs{$nodes{$join_key}}) && ($selfs{$nodes{$join_key}} eq $nodes{$joins{$join_key}})){
+		my $edge_combo = $nodes{$join_key}.$nodes{$joins{$join_key}};
+		# Checks if a selfing edge was already added for two nodes. Selfing edges are denoted with a double line.
+		unless ($self_joins{$edge_combo}){
+			$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:white:black\"]\r\n";
+			$self_joins{$nodes{$join_key}.$nodes{$joins{$join_key}}} = 1;
+		}
+	}
+	# Else it is just a normal edge with a child comprised of two different parents.
+	else {
 
-	#if ($joints{$temp}){
-	#	$graphviz_text .= $nodes{$join_key}." -- ".$joints{$temp}."\r\n";
-	#	$graphviz_text .= $joints{$temp}." -- ".$nodes{$joins{$join_key}}."\r\n";
-	#}
+		$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}."\r\n";
+		
+	}
+    }
 
-	#print STDERR "Join: $join_key $joins{$join_key} \n";
+   
 
-   }
-   $graphviz_text .= "//End Edge Relationships\r\n";
+    $graphviz_text .= "//End Edge Relationships\r\n";
 
-    #write graphviz footer if needed
+    # Ending/Closing Graphviz text
     $graphviz_text .= "\r\n}";
 
-   print $graphviz_text;
-   1;
+    print $graphviz_text;
+    1;
 }
 
 
