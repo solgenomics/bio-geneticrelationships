@@ -9,34 +9,34 @@ use Bio::GeneticRelationships::Individual;
 
 =head1 NAME
 
-    Bio::GeneticRelationships::Pedigree - Pedigree of an individual
+Bio::GeneticRelationships::Pedigree - Pedigree of an individual
 
 =head1 SYNOPSIS
 
-    my $variable = Bio::GeneticRelationships::Pedigree->new();
+my $variable = Bio::GeneticRelationships::Pedigree->new();
 
 =head1 DESCRIPTION
 
-    This class stores an individual's pedigree.
+This class stores an individual's pedigree.
 
 =head2 Methods
 
-=over 
+=over
 
 =cut
 
 subtype 'CrossType',
     as 'Str',
-    where { 
-	$_ eq 'single_cross' ||
-	$_ eq 'double_cross' ||
-	$_ eq 'three_way_cross' ||
-	$_ eq 'backcross' ||
-	$_ eq 'self' ||
-	$_ eq 'mixed_population' ||
-	$_ eq 'doubled_haploid' ||
-	$_ eq 'unknown' };
-	
+    where {
+$_ eq 'single_cross' ||
+$_ eq 'double_cross' ||
+$_ eq 'three_way_cross' ||
+$_ eq 'backcross' ||
+$_ eq 'self' ||
+$_ eq 'mixed_population' ||
+$_ eq 'doubled_haploid' ||
+$_ eq 'unknown' };
+
 
 has 'name' => (isa => 'Str',is => 'rw', predicate => 'has_name');
 has 'female_parent' => (isa =>'Bio::GeneticRelationships::Individual', is => 'rw', predicate => 'has_female_parent');
@@ -54,15 +54,15 @@ sub get_pedigree_string_purdy {
 sub get_pedigree_string_purdy_with_depth {
     my $self = shift;
     my $previous = shift;
-    my $female_pedigree;
-    my $male_pedigree;
+    my $female_pedigree = '';
+    my $male_pedigree = '';
     my $current_pedigree;
     my $female_pedigree_depth = 1;
     my $male_pedigree_depth = 1;
     my $deepest_depth;
     my $cross_indicator;
-    my $is_selfed;
-    my $is_backcross;
+    my $is_selfed = 0;
+    my $is_backcross = 1;
     my $backcross_count = 0;
     my $previous_was_selfed = 0;
     my $previous_was_backcrossed = 0;
@@ -91,16 +91,16 @@ sub get_pedigree_string_purdy_with_depth {
 	}
     }
 
+    if ($self->has_cross_type()){
 
-
-    if ($self->get_cross_type() eq "self" ){
-	$is_selfed = 1;
+	if ($self->get_cross_type() eq "self" ){
+	    $is_selfed = 1;
+	}
+	if ($self->get_cross_type() eq "backcross"){
+	    $is_backcross = 1;
+	    $backcross_count = 1;
+	}
     }
-    if ($self->get_cross_type() eq "backcross"){
-	$is_backcross = 1;
-	$backcross_count = 1;
-    }
-
 
     if ($self->has_female_parent()){
 	if ($self->get_female_parent()->has_pedigree()){
@@ -113,7 +113,12 @@ sub get_pedigree_string_purdy_with_depth {
 	    }
 	}
 	else {
-	    $female_pedigree = $self->get_female_parent()->get_name();
+	    if ($self->get_female_parent()->has_name()) {
+		$female_pedigree = $self->get_female_parent()->get_name();
+	    }
+	    else {
+		$female_pedigree = "?";
+	    }
 	}
     }
     else {
@@ -155,8 +160,10 @@ sub get_pedigree_string_purdy_with_depth {
 	$cross_indicator = '/'.$deepest_depth.'/';
     }
 
+    #remove
+    if (!defined($female_pedigree)) { $female_pedigree="undefined";}
 
-    if ($self->get_cross_type() eq "self" ){
+    if ($is_selfed==1 ){
 	my $selection_name;
 	
 	if ($self->has_selection_name()){
@@ -173,7 +180,7 @@ sub get_pedigree_string_purdy_with_depth {
 	}
 	$deepest_depth -= 1;
     }
-    elsif ($self->get_cross_type() eq "backcross") {
+    elsif ($is_backcross==1) {
 	#deal with backcrosses
     }
     else {
@@ -193,22 +200,22 @@ sub get_pedigree_string {
 	    $pedigree_str = $pedigree_str.$self->get_female_parent()->get_pedigree()->get_pedigree_string();
 	}
 	else {
-	    $pedigree_str = $pedigree_str.$self->get_female_parent()->get_name();
+		$pedigree_str = $pedigree_str.$self->get_female_parent()->get_name();
 	}
     }
     else {
 	$pedigree_str = $pedigree_str."?";
     }
 
-
     $pedigree_str = $pedigree_str." X ";
 
     if ($self->has_male_parent()){
 	if ($self->get_male_parent()->has_pedigree()){
+
 	    $pedigree_str = $pedigree_str.$self->get_male_parent()->get_pedigree()->get_pedigree_string();
 	}
 	else {
-	    $pedigree_str = $pedigree_str.$self->get_male_parent()->get_name();
+		$pedigree_str = $pedigree_str.$self->get_male_parent()->get_name();
 	}
     }
     else {
@@ -217,8 +224,6 @@ sub get_pedigree_string {
     $pedigree_str = $pedigree_str.")";
 }
 
-
-
 sub traverse_pedigree {
     #my $self = shift;
     my $trav_ped = shift; #female pedigree
@@ -226,55 +231,85 @@ sub traverse_pedigree {
     my $current_node_name = shift;
     my %nodes;
     my %joins;
+    my %joints;
+    my %selfs;	
     my $female_parent_id = "female_parent_of_$current_node_id";
     my $male_parent_id = "male_parent_of_$current_node_id";
     my $female_parent_name;
     my $male_parent_name;
+    my $joint_name;
    
     if ($trav_ped->has_female_parent()){
 	$joins{$female_parent_id} = $current_node_id;
 	if ($trav_ped->get_female_parent()->has_name()){
-	    $female_parent_name =  $trav_ped->get_female_parent()->get_name();
-	    
+		$female_parent_name = $trav_ped->get_female_parent()->get_name();
+
 	}
-	else {
-	    $female_parent_name = '';
+    	else {
+		$female_parent_name = '';
 	}
 	if ($trav_ped->get_female_parent()->has_pedigree()) {
-	    my (%returned_nodes,%returned_joins) = traverse_pedigree($trav_ped->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
-	    @nodes{keys %returned_nodes} = values %returned_nodes;
-	    @joins{keys %returned_joins} = values %returned_joins;
+		my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($trav_ped->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
+
+		@nodes{keys %$returned_nodes} = values %$returned_nodes;
+		@joins{keys %$returned_joins} = values %$returned_joins;
+		@selfs{keys %$returned_selfs} = values %$returned_selfs;
 	}
+
+	$nodes{$female_parent_id} = $female_parent_name;
+
     }
     else {
-	 $female_parent_name = '?';
+	$female_parent_name = '?';
     }
+ 
+    
 
     if ($trav_ped->has_male_parent()){
 	$joins{$male_parent_id} = $current_node_id;
 	if ($trav_ped->get_male_parent()->has_name()){
-	    $male_parent_name =  $trav_ped->get_male_parent()->get_name();
-	    
+		$male_parent_name = $trav_ped->get_male_parent()->get_name();
+
 	}
 	else {
-	    $male_parent_name = '';
+		$male_parent_name = '';
 	}
-	if ($trav_ped->get_male_parent()->has_pedigree()) {
-	    my (%returned_nodes,%returned_joins) = traverse_pedigree($trav_ped->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
-	    @nodes{keys %returned_nodes} = values %returned_nodes;
-	    @joins{keys %returned_joins} = values %returned_joins;
+
+	if ($female_parent_name ne $male_parent_name){
+		if ($trav_ped->get_male_parent()->has_pedigree()) {
+			my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($trav_ped->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
+			@nodes{keys %$returned_nodes} = values %$returned_nodes;
+			@joins{keys %$returned_joins} = values %$returned_joins;
+			@selfs{keys %$returned_selfs} = values %$returned_selfs;
+			
+		}
 	}
+	else {
+
+		$selfs{$female_parent_name} = $current_node_name;	
+	}
+
+
+	$nodes{$male_parent_id} = $male_parent_name;
+
     }
     else {
-	 $male_parent_name = '?';
+	$male_parent_name = '?';
     }
 
-    
-    
-    $nodes{$female_parent_id} = $female_parent_name;
-    $nodes{$male_parent_id} = $male_parent_name;
+#   if ($trav_ped->has_male_parent() && $trav_ped->has_female_parent()){
+#	$joint_name = "joint_".$female_parent_name."_and_".$male_parent_name;
+#	$joints{$joint_name} = $joint_name;
+#    }
 
-    return (\%nodes,\%joins);
+	
+
+	
+    #$nodes{$female_parent_id} = $female_parent_name;
+    #$nodes{$male_parent_id} = $male_parent_name;
+
+
+    return (\%nodes,\%joins,\%selfs);
 }
 
 sub draw_graphviz {
@@ -283,65 +318,136 @@ sub draw_graphviz {
     my $current_node_name = shift;
     my %nodes;
     my %joins;
+    my %joints;
+    my %selfs;	
     my $graphviz_text;
-    #write graphviz header - append lines to $graphviz_text
     my $female_parent_id = "female_parent_of_$current_node_id";
     my $male_parent_id = "male_parent_of_$current_node_id";
     my $female_parent_name;
     my $male_parent_name;
 
+    # Graphviz header text	
+    $graphviz_text .= "//Generated Graphviz dot file. May need to adjust nodesep or ranksep values for best look.\r\n";
+    $graphviz_text .= "graph Pedigree {\r\n\r\n";
+
     $nodes{$current_node_id} = $current_node_name;
     
-    if ($self->has_female_parent()) {
-	$joins{$female_parent_id} = $current_node_id;    
-        
-	if ($self->get_female_parent()->has_name()){
-	    $female_parent_name = $self->get_female_parent()->get_name();
-	}
-	else {
-	    $female_parent_name = '';
-	}
-	$nodes{$female_parent_id} = $female_parent_name;
-	if ($self->get_female_parent()->has_pedigree()){
-	    my ($returned_nodes,$returned_joins) = traverse_pedigree($self->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
-	    @nodes{keys %$returned_nodes} = values %$returned_nodes;
-	    @joins{keys %$returned_joins} = values %$returned_joins;
-	}
-    }
+    
 
+    if ($self->has_female_parent()) {
+	$joins{$female_parent_id} = $current_node_id;
+        
+	    if ($self->get_female_parent()->has_name()){
+		$female_parent_name = $self->get_female_parent()->get_name();
+	    }
+	    else {
+		$female_parent_name = '';
+	    }
+	    $nodes{$female_parent_id} = $female_parent_name;
+	
+	    if ($self->get_female_parent()->has_pedigree()){
+		my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($self->get_female_parent()->get_pedigree(),$female_parent_id,$female_parent_name);
+		@nodes{keys %$returned_nodes} = values %$returned_nodes;
+		@joins{keys %$returned_joins} = values %$returned_joins;
+		@selfs{keys %$returned_selfs} = values %$returned_selfs;
+
+	    }
+    }
+    
 
     if ($self->has_male_parent()) {
-	$joins{$male_parent_id} = $current_node_id;    
+	$joins{$male_parent_id} = $current_node_id;
         
-	if ($self->get_male_parent()->has_name()){
-	    $male_parent_name = $self->get_male_parent()->get_name();
+	    if ($self->get_male_parent()->has_name()){
+		$male_parent_name = $self->get_male_parent()->get_name();
+	    }
+	    else {
+		$male_parent_name = '';
+	    }
+
+	    $nodes{$male_parent_id} = $male_parent_name;
+
+	if ($female_parent_name ne $male_parent_name){
+		if ($self->get_male_parent()->has_pedigree()) {
+			my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($self->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
+			@nodes{keys %$returned_nodes} = values %$returned_nodes;
+			@joins{keys %$returned_joins} = values %$returned_joins;
+			@selfs{keys %$returned_selfs} = values %$returned_selfs;
+			
+		}
 	}
 	else {
-	    $male_parent_name = '';
+
+		$selfs{$female_parent_name} = $current_node_name;	
 	}
-	$nodes{$male_parent_id} = $male_parent_name;
-	if ($self->get_male_parent()->has_pedigree()){
-	    my ($returned_nodes,$returned_joins) = traverse_pedigree($self->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
-	    @nodes{keys %$returned_nodes} = values %$returned_nodes;
-	    @joins{keys %$returned_joins} = values %$returned_joins;
-	}
+
     }
-
-
     
-    #write nodes to graphviz
+
+    $graphviz_text .= "node [color = \"red\"]\r\nnode [fontsize=11, fontname=\"Helvetica\"]\r\ngraph [bgcolor=\"#FAFAFA\"]\r\nranksep= .9\r\nnodesep=1.2\r\n\r\n";
+    $graphviz_text .= "//Node Declarations\r\n";
+
+    #Quick way to stop making duplicate node declarations in the Graphviz file.
+    my %hashcheck;
+    
+    #Makes node declarations in the Graphviz file.
     foreach my $node_key (keys %nodes) {
-	#print STDERR "Node: $node_key $nodes{$node_key} \n";
+
+	unless ($hashcheck{$nodes{$node_key}}) {
+		$hashcheck{$nodes{$node_key}} = $nodes{$node_key};	
+	
+		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]\r\n";
+		#$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+		$graphviz_text .= $node_key." [label=\"".$nodes{$node_key}."\", href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+		if ($node_key lt "m"){
+			$graphviz_text .= "[shape = \"ellipse\"]";
+		}
+		else {
+			$graphviz_text .= "[shape = \"box\"]";
+		}
+
+		$graphviz_text .= "\r\n";
+		#print STDERR "Node: $node_key $nodes{$node_key} \n";
+	}
     }
-     #write joins to graphviz
-    foreach my $join_key (keys %joins){
-	#print STDERR "Join: $join_key $joins{$join_key} \n";
 
-   }
+   $graphviz_text .= "//End Node Declarations\r\n\r\n";
 
-    #write graphviz footer if needed
+   $graphviz_text .= "//Edge Relationships\r\n";
+	
+    
+   # Hash that stores selfing edges already added in the loop
+   my %self_joins;	
 
-   1;
+   foreach my $join_key (keys %joins){
+	
+	# Checks if an edge is a selfing-edge.
+	if (($selfs{$nodes{$join_key}}) && ($selfs{$nodes{$join_key}} eq $nodes{$joins{$join_key}})){
+		my $edge_combo = $nodes{$join_key}.$nodes{$joins{$join_key}};
+		# Checks if a selfing edge was already added for two nodes. Selfing edges are denoted with a double line.
+		unless ($self_joins{$edge_combo}){
+			#$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:white:black\"]\r\n";
+			$graphviz_text .= $join_key." -- ".$joins{$join_key}." [color=\"black:white:black\"]\r\n";
+			$self_joins{$nodes{$join_key}.$nodes{$joins{$join_key}}} = 1;
+		}
+	}
+	# Else it is just a normal edge with a child comprised of two different parents.
+	else {
+
+	    #$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}."\r\n";
+	    $graphviz_text .= $join_key." -- ".$joins{$join_key}."\r\n";
+		
+	}
+    }
+
+   
+
+    $graphviz_text .= "//End Edge Relationships\r\n";
+
+    # Ending/Closing Graphviz text
+    $graphviz_text .= "\r\n}\n";
+    print STDERR $graphviz_text;
+    1;
 }
 
 
@@ -356,10 +462,10 @@ sub draw_graphviz {
 
 =head1 LICENSE
 
-    Same as Perl.
+Same as Perl.
 
 =head1 AUTHORS
 
-    Jeremy D. Edwards <jde22@cornell.edu>   
+Jeremy D. Edwards <jde22@cornell.edu>
 
 =cut

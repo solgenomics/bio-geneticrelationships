@@ -2,14 +2,14 @@
 
 =head1 NAME
 
-  pedigree.t
-  A test for Bio::GeneticRelationships::Pedigree class
+pedigree.t
+A test for Bio::GeneticRelationships::Pedigree class
 
 =cut
 
 =head1 SYNOPSIS
 
- perl pedigree.t
+perl pedigree.t
 
 
 =head1 DESCRIPTION
@@ -19,7 +19,6 @@
 =head2 Author
 
 Jeremy Edwards <jde22@cornell.edu>
-    
 =cut
 
 use strict;
@@ -27,7 +26,7 @@ use warnings;
 use autodie;
 
 
-use Test::More tests => 38;
+use Test::More tests => 36;
 BEGIN {use_ok( 'Bio::GeneticRelationships::Pedigree' ); }
 require_ok( 'Bio::GeneticRelationships::Pedigree' );
 ok (my $pedigree = Bio::GeneticRelationships::Pedigree->new());
@@ -73,7 +72,7 @@ ok ($pedigree->set_cross_type('single_cross'));
 is ($pedigree->get_cross_type(),'single_cross');
 #test pedigree string methods
 ok (print STDERR "\n\n".$pedigree->get_pedigree_string()."\n\n");
-ok (my $pedigree_as_purdy = $pedigree->get_pedigree_string_purdy());
-ok (print STDERR "\n\nPurdy:\n".$pedigree_as_purdy."\n\n");
+#ok (my $pedigree_as_purdy = $pedigree->get_pedigree_string_purdy());
+#ok (print STDERR "\n\nPurdy:\n".$pedigree_as_purdy."\n\n");
 #test graphviz methods
 ok ($pedigree->draw_graphviz("root","root"));

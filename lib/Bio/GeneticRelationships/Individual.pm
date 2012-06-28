@@ -9,19 +9,19 @@ use Bio::GeneticRelationships::Pedigree;
 
 =head1 NAME
 
-    Indvidual - An individual organism with genetic relationships to other individuals
+Indvidual - An individual organism with genetic relationships to other individuals
 
 =head1 SYNOPSIS
 
-    my $variable = Bio::GeneticRelationships::Individual->new();
+my $variable = Bio::GeneticRelationships::Individual->new();
 
 =head1 DESCRIPTION
 
-    This class stores information about an individual organism and its genetic relationships to other individuals.
+This class stores information about an individual organism and its genetic relationships to other individuals.
 
 =head2 Methods
 
-=over 
+=over
 
 =cut
 
@@ -44,10 +44,10 @@ has 'pedigree' => (isa =>'Bio::GeneticRelationships::Pedigree', is => 'rw', pred
 
 =head1 LICENSE
 
-    Same as Perl.
+Same as Perl.
 
 =head1 AUTHORS
 
-    Jeremy D. Edwards <jde22@cornell.edu>   
+Jeremy D. Edwards <jde22@cornell.edu>
 
 =cut
