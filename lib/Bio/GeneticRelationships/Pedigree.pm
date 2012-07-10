@@ -385,8 +385,8 @@ sub draw_graphviz {
 	unless ($hashcheck{$nodes{$node_key}}) {
 		$hashcheck{$nodes{$node_key}} = $nodes{$node_key};	
 	
-		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]\r\n";
-		$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"load_tooltip_text('\N')\" onmouseout=\"htm()\"]\r\n";
+		$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"load_tooltip_text(\'\\N\')\" onmouseout=\"htm()\"]";
 		if ($node_key lt "m"){
 			$graphviz_text .= "[shape = \"ellipse\"]";
 		}
@@ -414,7 +414,7 @@ sub draw_graphviz {
 		my $edge_combo = $nodes{$join_key}.$nodes{$joins{$join_key}};
 		# Checks if a selfing edge was already added for two nodes. Selfing edges are denoted with a double line.
 		unless ($self_joins{$edge_combo}){
-			$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:white:black\"]\r\n";
+			$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:black\"]\r\n";
 			$self_joins{$nodes{$join_key}.$nodes{$joins{$join_key}}} = 1;
 		}
 	}
