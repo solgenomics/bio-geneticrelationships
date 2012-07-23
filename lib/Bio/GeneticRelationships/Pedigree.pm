@@ -54,15 +54,25 @@ sub get_pedigree_string_purdy {
 sub get_pedigree_string_purdy_with_depth {
     my $self = shift;
     my $previous = shift;
+<<<<<<< HEAD
     my $female_pedigree;
     my $male_pedigree;
+=======
+    my $female_pedigree = '';
+    my $male_pedigree = '';
+>>>>>>> jeremy/master
     my $current_pedigree;
     my $female_pedigree_depth = 1;
     my $male_pedigree_depth = 1;
     my $deepest_depth;
     my $cross_indicator;
+<<<<<<< HEAD
     my $is_selfed;
     my $is_backcross;
+=======
+    my $is_selfed = 0;
+    my $is_backcross = 1;
+>>>>>>> jeremy/master
     my $backcross_count = 0;
     my $previous_was_selfed = 0;
     my $previous_was_backcrossed = 0;
@@ -71,6 +81,7 @@ sub get_pedigree_string_purdy_with_depth {
 
     if (defined($previous)){
 	if ($previous->get_cross_type() eq 'self') {
+<<<<<<< HEAD
      		$previous_was_selfed = 1;
 	}
 	if ($previous->get_cross_type() eq 'backcross') {
@@ -114,6 +125,56 @@ sub get_pedigree_string_purdy_with_depth {
 	}
 	else {
 		$female_pedigree = $self->get_female_parent()->get_name();
+=======
+    	   $previous_was_selfed  = 1;
+	}
+	if ($previous->get_cross_type() eq 'backcross') {
+	    $previous_was_backcrossed = 1;
+	    if ($self->get_cross_type() eq 'backcross') {
+		if ($self->get_female_parent()->get_name() eq $previous->get_female_parent->get_name()){
+		    $recurrent_parent = $self->get_female_parent->get_name();
+		    $recurrent_parent_isa = 'female';
+		}
+		elsif ($self->get_male_parent()->get_name() eq $previous->get_male_parent->get_name()){
+		    $recurrent_parent = $self->get_male_parent->get_name();
+		    $recurrent_parent_isa = 'male';
+		}
+		else {
+		    #
+		}
+	    }
+	}
+    }
+
+    if ($self->has_cross_type()){
+
+	if ($self->get_cross_type() eq "self" ){
+	    $is_selfed = 1;
+	}
+	if ($self->get_cross_type() eq "backcross"){
+	    $is_backcross = 1;
+	    $backcross_count = 1;
+	}
+    }
+
+    if ($self->has_female_parent()){
+	if ($self->get_female_parent()->has_pedigree()){
+	    my ($depth, $returned_pedigree, $b_count) = $self->get_female_parent()->get_pedigree()->get_pedigree_string_purdy_with_depth($self);
+	    $female_pedigree = $returned_pedigree;
+	    $female_pedigree_depth += $depth;
+	    $backcross_count += $b_count; 
+	    if ($self->get_female_parent()->has_name()) {
+		$female_pedigree = $female_pedigree.'('.$self->get_female_parent()->get_name().')';
+	    }
+	}
+	else {
+	    if ($self->get_female_parent()->has_name()) {
+		$female_pedigree = $self->get_female_parent()->get_name();
+	    }
+	    else {
+		$female_pedigree = "?";
+	    }
+>>>>>>> jeremy/master
 	}
     }
     else {
@@ -123,6 +184,7 @@ sub get_pedigree_string_purdy_with_depth {
 
     if ($self->has_male_parent()){
 	if ($self->get_male_parent()->has_pedigree()){
+<<<<<<< HEAD
 		my ($depth, $returned_pedigree) = $self->get_male_parent()->get_pedigree()->get_pedigree_string_purdy_with_depth($self);
 		$male_pedigree = $returned_pedigree;
 		$male_pedigree_depth += $depth;
@@ -132,6 +194,17 @@ sub get_pedigree_string_purdy_with_depth {
 	}
 	else {
 		$male_pedigree = $self->get_male_parent()->get_name();
+=======
+	    my ($depth, $returned_pedigree) = $self->get_male_parent()->get_pedigree()->get_pedigree_string_purdy_with_depth($self);
+	    $male_pedigree = $returned_pedigree;
+	    $male_pedigree_depth += $depth;
+	    if ($self->get_male_parent()->has_name()) {
+		$male_pedigree = $male_pedigree.'('.$self->get_male_parent()->get_name().')';
+	    }
+	}
+	else {
+	    $male_pedigree = $self->get_male_parent()->get_name();
+>>>>>>> jeremy/master
 	}
     }
     else {
@@ -155,6 +228,7 @@ sub get_pedigree_string_purdy_with_depth {
 	$cross_indicator = '/'.$deepest_depth.'/';
     }
 
+<<<<<<< HEAD
 
     if ($self->get_cross_type() eq "self" ){
 	my $selection_name;
@@ -174,6 +248,29 @@ sub get_pedigree_string_purdy_with_depth {
 	$deepest_depth -= 1;
     }
     elsif ($self->get_cross_type() eq "backcross") {
+=======
+    #remove
+    if (!defined($female_pedigree)) { $female_pedigree="undefined";}
+
+    if ($is_selfed==1 ){
+	my $selection_name;
+	
+	if ($self->has_selection_name()){
+	    $selection_name = $self->get_selection_name();
+	}
+	else {
+	    $selection_name = '?';
+	}
+	if ($previous_was_selfed == 1){
+	    $current_pedigree = $female_pedigree.'-'.$selection_name;
+	}
+	else {
+	    $current_pedigree = '['.$female_pedigree.']-'.$selection_name;
+	}
+	$deepest_depth -= 1;
+    }
+    elsif ($is_backcross==1) {
+>>>>>>> jeremy/master
 	#deal with backcrosses
     }
     else {
@@ -190,7 +287,11 @@ sub get_pedigree_string {
     $pedigree_str = $pedigree_str."(";
     if ($self->has_female_parent()){
 	if ($self->get_female_parent()->has_pedigree()){
+<<<<<<< HEAD
 		$pedigree_str = $pedigree_str.$self->get_female_parent()->get_pedigree()->get_pedigree_string();
+=======
+	    $pedigree_str = $pedigree_str.$self->get_female_parent()->get_pedigree()->get_pedigree_string();
+>>>>>>> jeremy/master
 	}
 	else {
 		$pedigree_str = $pedigree_str.$self->get_female_parent()->get_name();
@@ -204,7 +305,12 @@ sub get_pedigree_string {
 
     if ($self->has_male_parent()){
 	if ($self->get_male_parent()->has_pedigree()){
+<<<<<<< HEAD
 		$pedigree_str = $pedigree_str.$self->get_male_parent()->get_pedigree()->get_pedigree_string();
+=======
+
+	    $pedigree_str = $pedigree_str.$self->get_male_parent()->get_pedigree()->get_pedigree_string();
+>>>>>>> jeremy/master
 	}
 	else {
 		$pedigree_str = $pedigree_str.$self->get_male_parent()->get_name();
@@ -323,6 +429,11 @@ sub draw_graphviz {
     $graphviz_text .= "graph Pedigree {\r\n\r\n";
 
     $nodes{$current_node_id} = $current_node_name;
+<<<<<<< HEAD
+=======
+    
+    
+>>>>>>> jeremy/master
 
     if ($self->has_female_parent()) {
 	$joins{$female_parent_id} = $current_node_id;
@@ -343,6 +454,10 @@ sub draw_graphviz {
 
 	    }
     }
+<<<<<<< HEAD
+=======
+    
+>>>>>>> jeremy/master
 
     if ($self->has_male_parent()) {
 	$joins{$male_parent_id} = $current_node_id;
@@ -371,11 +486,17 @@ sub draw_graphviz {
 	}
 
     }
-
+    
 
     $graphviz_text .= "node [color = \"red\"]\r\nnode [fontsize=11, fontname=\"Helvetica\"]\r\ngraph [bgcolor=\"#FAFAFA\"]\r\nranksep= .9\r\nnodesep=1.2\r\n\r\n";
     $graphviz_text .= "//Node Declarations\r\n";
 
+<<<<<<< HEAD
+    $graphviz_text .= "node [color = \"red\"]\r\nnode [fontsize=11, fontname=\"Helvetica\"]\r\ngraph [bgcolor=\"#FAFAFA\"]\r\nranksep= .9\r\nnodesep=1.2\r\n\r\n";
+    $graphviz_text .= "//Node Declarations\r\n";
+
+=======
+>>>>>>> jeremy/master
     #Quick way to stop making duplicate node declarations in the Graphviz file.
     my %hashcheck;
     
@@ -385,8 +506,14 @@ sub draw_graphviz {
 	unless ($hashcheck{$nodes{$node_key}}) {
 		$hashcheck{$nodes{$node_key}} = $nodes{$node_key};	
 	
+<<<<<<< HEAD
 		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"load_tooltip_text('\N')\" onmouseout=\"htm()\"]\r\n";
 		$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"load_tooltip_text(\'\\N\')\" onmouseout=\"htm()\"]";
+=======
+		#$graphviz_text .= $node_key." | ".$nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]\r\n";
+		#$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+		$graphviz_text .= $node_key." [label=\"".$nodes{$node_key}."\", href=\"#\" onmouseover=\"stm(Text[14],Style[12])\" onmouseout=\"htm()\"]";
+>>>>>>> jeremy/master
 		if ($node_key lt "m"){
 			$graphviz_text .= "[shape = \"ellipse\"]";
 		}
@@ -403,7 +530,11 @@ sub draw_graphviz {
 
    $graphviz_text .= "//Edge Relationships\r\n";
 	
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> jeremy/master
    # Hash that stores selfing edges already added in the loop
    my %self_joins;	
 
@@ -414,19 +545,30 @@ sub draw_graphviz {
 		my $edge_combo = $nodes{$join_key}.$nodes{$joins{$join_key}};
 		# Checks if a selfing edge was already added for two nodes. Selfing edges are denoted with a double line.
 		unless ($self_joins{$edge_combo}){
+<<<<<<< HEAD
 			$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:black\"]\r\n";
+=======
+			#$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}." [color=\"black:white:black\"]\r\n";
+			$graphviz_text .= $join_key." -- ".$joins{$join_key}." [color=\"black:white:black\"]\r\n";
+>>>>>>> jeremy/master
 			$self_joins{$nodes{$join_key}.$nodes{$joins{$join_key}}} = 1;
 		}
 	}
 	# Else it is just a normal edge with a child comprised of two different parents.
 	else {
 
+<<<<<<< HEAD
 		$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}."\r\n";
+=======
+	    #$graphviz_text .= $nodes{$join_key}." -- ".$nodes{$joins{$join_key}}."\r\n";
+	    $graphviz_text .= $join_key." -- ".$joins{$join_key}."\r\n";
+>>>>>>> jeremy/master
 		
 	}
     }
 
    
+<<<<<<< HEAD
 
     $graphviz_text .= "//End Edge Relationships\r\n";
 
@@ -434,6 +576,14 @@ sub draw_graphviz {
     $graphviz_text .= "\r\n}";
 
     print $graphviz_text;
+=======
+
+    $graphviz_text .= "//End Edge Relationships\r\n";
+
+    # Ending/Closing Graphviz text
+    $graphviz_text .= "\r\n}\n";
+    print STDERR $graphviz_text;
+>>>>>>> jeremy/master
     1;
 }
 

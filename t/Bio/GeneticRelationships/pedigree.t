@@ -26,7 +26,11 @@ use warnings;
 use autodie;
 
 
+<<<<<<< HEAD
 use Test::More tests => 38;
+=======
+use Test::More tests => 36;
+>>>>>>> jeremy/master
 BEGIN {use_ok( 'Bio::GeneticRelationships::Pedigree' ); }
 require_ok( 'Bio::GeneticRelationships::Pedigree' );
 ok (my $pedigree = Bio::GeneticRelationships::Pedigree->new());
@@ -72,7 +76,12 @@ ok ($pedigree->set_cross_type('single_cross'));
 is ($pedigree->get_cross_type(),'single_cross');
 #test pedigree string methods
 ok (print STDERR "\n\n".$pedigree->get_pedigree_string()."\n\n");
+<<<<<<< HEAD
 ok (my $pedigree_as_purdy = $pedigree->get_pedigree_string_purdy());
 ok (print STDERR "\n\nPurdy:\n".$pedigree_as_purdy."\n\n");
+=======
+#ok (my $pedigree_as_purdy = $pedigree->get_pedigree_string_purdy());
+#ok (print STDERR "\n\nPurdy:\n".$pedigree_as_purdy."\n\n");
+>>>>>>> jeremy/master
 #test graphviz methods
 ok ($pedigree->draw_graphviz("root","root"));
