@@ -93,9 +93,7 @@ sub get_pedigree_string_purdy_with_depth {
 	    }
 	}
     }
-
     if ($self->has_cross_type()){
-
 	if ($self->get_cross_type() eq "self" ){
 	    $is_selfed = 1;
 	}
@@ -104,7 +102,6 @@ sub get_pedigree_string_purdy_with_depth {
 	    $backcross_count = 1;
 	}
     }
-
     if ($self->has_female_parent()){
 	if ($self->get_female_parent()->has_pedigree()){
 	    my ($depth, $returned_pedigree, $b_count) = $self->get_female_parent()->get_pedigree()->get_pedigree_string_purdy_with_depth($self);
@@ -127,8 +124,6 @@ sub get_pedigree_string_purdy_with_depth {
     else {
 	$female_pedigree = "?";
     }
-
-
     if ($self->has_male_parent()){
 	if ($self->get_male_parent()->has_pedigree()){
 	    my ($depth, $returned_pedigree) = $self->get_male_parent()->get_pedigree()->get_pedigree_string_purdy_with_depth($self);
@@ -145,7 +140,6 @@ sub get_pedigree_string_purdy_with_depth {
     else {
 	$male_pedigree = "?";
     }
-    
 
     if ($female_pedigree_depth > $male_pedigree_depth) {
 	$deepest_depth = $female_pedigree_depth;
@@ -168,7 +162,6 @@ sub get_pedigree_string_purdy_with_depth {
 
     if ($is_selfed==1 ){
 	my $selection_name;
-	
 	if ($self->has_selection_name()){
 	    $selection_name = $self->get_selection_name();
 	}
@@ -192,7 +185,6 @@ sub get_pedigree_string_purdy_with_depth {
 
     return ($deepest_depth,$current_pedigree,$backcross_count);
 }
-
 
 sub get_pedigree_string {
     my $self = shift;
@@ -241,7 +233,6 @@ sub traverse_pedigree {
     my $female_parent_name;
     my $male_parent_name;
     my $joint_name;
-   
     if ($trav_ped->has_female_parent()){
 	$joins{$female_parent_id} = $current_node_id;
 	if ($trav_ped->get_female_parent()->has_name()){
@@ -258,43 +249,33 @@ sub traverse_pedigree {
 		@joins{keys %$returned_joins} = values %$returned_joins;
 		@selfs{keys %$returned_selfs} = values %$returned_selfs;
 	}
-
 	$nodes{$female_parent_id} = $female_parent_name;
-
     }
     else {
 	$female_parent_name = '?';
     }
- 
-    
 
     if ($trav_ped->has_male_parent()){
 	$joins{$male_parent_id} = $current_node_id;
 	if ($trav_ped->get_male_parent()->has_name()){
 		$male_parent_name = $trav_ped->get_male_parent()->get_name();
-
 	}
 	else {
 		$male_parent_name = '';
 	}
-
 	if ($female_parent_name ne $male_parent_name){
 		if ($trav_ped->get_male_parent()->has_pedigree()) {
 			my ($returned_nodes,$returned_joins,$returned_selfs) = traverse_pedigree($trav_ped->get_male_parent()->get_pedigree(),$male_parent_id,$male_parent_name);
 			@nodes{keys %$returned_nodes} = values %$returned_nodes;
 			@joins{keys %$returned_joins} = values %$returned_joins;
 			@selfs{keys %$returned_selfs} = values %$returned_selfs;
-			
 		}
 	}
 	else {
 
-		$selfs{$female_parent_name} = $current_node_name;	
+		$selfs{$female_parent_name} = $current_node_name;
 	}
-
-
 	$nodes{$male_parent_id} = $male_parent_name;
-
     }
     else {
 	$male_parent_name = '?';
@@ -304,14 +285,8 @@ sub traverse_pedigree {
 #	$joint_name = "joint_".$female_parent_name."_and_".$male_parent_name;
 #	$joints{$joint_name} = $joint_name;
 #    }
-
-	
-
-	
     #$nodes{$female_parent_id} = $female_parent_name;
     #$nodes{$male_parent_id} = $male_parent_name;
-
-
     return (\%nodes,\%joins,\%selfs);
 }
 
@@ -364,10 +339,12 @@ sub draw_graphviz {
 		$joins{$female_parent_id} = $current_node_id;
 
 		if ($self->get_female_parent()->has_name()){
+
 		$female_parent_name = $self->get_female_parent()->get_name();
 		}
 		else {
 		$female_parent_name = '';
+
 		}
 		$nodes{$female_parent_id} = $female_parent_name;
 
@@ -401,6 +378,7 @@ sub draw_graphviz {
 				@selfs{keys %$returned_selfs} = values %$returned_selfs;
 		
 			}
+
 		}
 		else {
 
@@ -434,6 +412,7 @@ sub draw_graphviz {
 
 			$graphviz_text .= "\r\n";
 			#print STDERR "Node: $node_key $nodes{$node_key} \n";
+
 		}
 	}
 
@@ -482,9 +461,8 @@ sub draw_graphviz {
 	$graph -> run(format => $format, output_file => $output_file);
 
 	1;
+
 }
-
-
 
 ###
 1;#do not remove
