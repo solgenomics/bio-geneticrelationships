@@ -252,10 +252,12 @@ sub traverse_pedigree {
   return (\%nodes,\%joins,\%selfs);
 }
 
-sub draw_graphviz {
+sub get_graphviz {
   my $self = shift;
   my $current_node_id = shift;
   my $current_node_name = shift;
+  #my $format = shift;
+  #my $output_file = shift;
   my %nodes;
   my %joins;
   my %joints;
@@ -368,13 +370,25 @@ sub draw_graphviz {
   # Ending/Closing Graphviz text
   $graphviz_text .= "\r\n}";
   print STDERR $graphviz_text;
-  my($format)        = shift || 'xdot';
+  #my($format)        = shift || 'svg';
   #my($suffix)      = $format eq 'png:gd' ? 'png' : $format;
-  my($suffix) = 'gv';
-  my($output_file) = shift || File::Spec -> catfile('.', "pedigree-out.$suffix");
-  $graph -> run(format => $format, output_file => $output_file);
-  1;
+  #my($suffix) = 'gv';
+  #my($output_file) = shift || File::Spec -> catfile('.', "pedigree-out.$suffix");
+  #$graph -> run(format => $format, output_file => $output_file);
+  return $graph;
+  #1;
 }
+
+sub draw_graphviz {
+  my $self = shift;
+  my $current_node_id = shift;
+  my $current_node_name = shift;
+  my $format = shift;
+  my $output_file = shift;
+  my $graph = get_graphviz($self,$current_node_id, $current_node_name,$format,$output_file);
+  $graph -> run(format => $format, output_file => $output_file);
+}
+
 
 ###
 1;                              #do not remove

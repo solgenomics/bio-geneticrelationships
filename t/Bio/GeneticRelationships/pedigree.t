@@ -75,4 +75,4 @@ ok (print STDERR "\n\n".$pedigree->get_pedigree_string()."\n\n");
 #ok (my $pedigree_as_purdy = $pedigree->get_pedigree_string_purdy());
 #ok (print STDERR "\n\nPurdy:\n".$pedigree_as_purdy."\n\n");
 #test graphviz methods
-ok ($pedigree->draw_graphviz("root","root"));
+ok ($pedigree->draw_graphviz("root","root","svg","test.svg"));
