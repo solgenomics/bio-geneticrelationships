@@ -424,12 +424,14 @@ sub draw_graphviz {
 
 			$graphviz_text .= $nodes{$node_key}." [href=\"#\" onmouseover=\"load_tooltip_text(\'\\N\')\" onmouseout=\"htm()\"]";
 			if ($node_key lt "m"){
-				$graph -> add_node(name => $nodes{$node_key},  href => '#',  onmouseover=>'load_tooltip_text(\'\N\')', onmouseout=>'htm()', shape=>'ellipse');
+				#$graph -> add_node(name => $nodes{$node_key},  href => '#',  onmouseover=>'load_tooltip_text(\'\N\')', onmouseout=>'htm()', shape=>'ellipse');
+				$graph -> add_node(name => $nodes{$node_key},  href => '#', shape=>'ellipse');
 				$graphviz_text .= "[shape = \"ellipse\"]";
 			}
 			else {
-				$graph -> add_node(name => $nodes{$node_key},  href => '#',  onmouseover=>'load_tooltip_text(\'\N\')', onmouseout=>'htm()', shape=>'box');
-				$graphviz_text .= "[shape = \"box\"]";
+				#$graph -> add_node(name => $nodes{$node_key},  href => '#',  onmouseover=>'load_tooltip_text(\'\N\')', onmouseout=>'htm()', shape=>'box');
+			  $graph -> add_node(name => $nodes{$node_key},  href => '#', shape=>'box');
+			  $graphviz_text .= "[shape = \"box\"]";
 			}
 
 			$graphviz_text .= "\r\n";
